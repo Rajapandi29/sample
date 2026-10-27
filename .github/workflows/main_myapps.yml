@@ -1,56 +1,42 @@
 
-name: Build and deploy Next.js + Node.js to Azure - myapps
+name: Deploy myapps to Azure
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "22"
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Next.js frontend
-        run: npm run build
-
-      - name: Test production server startup
+      - name: Build app
+        working-directory: frontend
         run: |
-          test -f .next/BUILD_ID
-          test -f backend/server.js
-          node --check backend/server.js
+          npm install
+          npm run build
 
-      - name: Prepare deployment package
+      - name: Prepare deployment
         run: |
-          mkdir -p deploy
-          cp -r .next deploy/.next
-          cp -r public deploy/public
+          mkdir deploy
+          cp -r frontend/.next deploy/.next
+          cp -r frontend/app deploy/app
           cp -r backend deploy/backend
-          cp package.json deploy/package.json
-          cp package-lock.json deploy/package-lock.json
-          cp next.config.ts deploy/next.config.ts
+          cp frontend/package.json deploy/package.json
+          cp frontend/next.config.ts deploy/next.config.ts
           cd deploy
           npm install --omit=dev
 
-      - name: Deploy to Azure App Service
+      - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: myapps
-          slot-name: Production
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ABC43CC5DAE9429B907A70774F416978 }}
           package: deploy
