@@ -1,55 +1,57 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - myapps
+name: Build and deploy Next.js + Node.js to Azure - myapps
 
 on:
   push:
     branches:
-      - 'main'
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '24.x'
+          node-version: "22.x"
+          cache: npm
 
-      - name: npm install, build, and test
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js frontend
+        run: npm run build
+
+      - name: Test production server startup
         run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+          test -f .next/BUILD_ID
+          test -f backend/server.js
+          node --check backend/server.js
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: .
+      - name: Prepare deployment package
+        run: |
+          mkdir -p deploy
+          cp -r .next deploy/.next
+          cp -r public deploy/public
+          cp -r backend deploy/backend
+          cp package.json deploy/package.json
+          cp package-lock.json deploy/package-lock.json
+          cp next.config.ts deploy/next.config.ts
+          cd deploy
+          npm ci --omit=dev
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
-      
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
+      - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'myapps'
-          slot-name: 'Production'
-          package: .
+          app-name: myapps
+          slot-name: Production
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ABC43CC5DAE9429B907A70774F416978 }}
+          package: deploy
