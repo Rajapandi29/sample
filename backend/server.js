@@ -1,24 +1,35 @@
 
 const express = require("express");
+const next = require("next");
 
-const app = express();
+const dev = process.env.NODE_ENV !== "production";
+const app = next({ dev });
+const handle = app.getRequestHandler();
+
+const server = express();
 const port = process.env.PORT || 8080;
 
-app.use(express.json());
+server.use(express.json());
 
-app.get("/api/hello", (req, res) => {
+server.get("/api/hello", (req, res) => {
   res.json({
     message: "Hello from Azure App Service!",
-    application: "Dynamic Backend",
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "production"
+    application: "myapps",
+    timestamp: new Date().toISOString()
   });
 });
 
-app.get("/health", (req, res) => {
+server.get("/health", (req, res) => {
   res.status(200).json({ status: "healthy" });
 });
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Backend listening on port ${port}`);
+app.prepare().then(() => {
+  server.all("/{*path}", (req, res) => handle(req, res));
+
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`myapps listening on port ${port}`);
+  });
+}).catch((err) => {
+  console.error("Failed to start Next.js:", err);
+  process.exit(1);
 });

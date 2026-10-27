@@ -2,8 +2,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Azure Static and Dynamic App",
-  description: "Next.js static frontend with Azure API backend"
+  title: "My Azure Application",
+  description: "Next.js and Express on Azure App Service"
 };
 
 export default function RootLayout({
@@ -11,15 +11,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body style={{
-        fontFamily: "Arial, sans-serif",
-        margin: 0,
-        padding: "40px",
-        background: "#f3f6fb",
-        color: "#172033"
-      }}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

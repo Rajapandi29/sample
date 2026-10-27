@@ -4,57 +4,50 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [result, setResult] = useState("Click the button to call the API.");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function callApi() {
     setLoading(true);
+
     try {
       const response = await fetch("/api/hello");
-      if (!response.ok) throw new Error("API request failed");
+
+      if (!response.ok) {
+        throw new Error("API request failed");
+      }
+
       const data = await response.json();
-      setResult(JSON.stringify(data, null, 2));
+      setMessage(JSON.stringify(data, null, 2));
     } catch {
-      setResult(
-        "API unavailable. Check Front Door, APIM, networking and DNS."
-      );
+      setMessage("API request failed. Check server logs.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main style={{ maxWidth: 760, margin: "40px auto" }}>
-      <h1>Azure Static + Dynamic Application</h1>
-      <p>
-        This page is statically generated with Next.js.
-        The button calls the dynamic backend through Azure API Management.
-      </p>
+    <main style={{
+      maxWidth: 800,
+      margin: "60px auto",
+      padding: 24,
+      fontFamily: "Arial, sans-serif"
+    }}>
+      <h1>My Azure Application</h1>
+      <p>Frontend: Next.js</p>
+      <p>Backend: Node.js / Express</p>
 
-      <button
-        onClick={callApi}
-        disabled={loading}
-        style={{
-          padding: "12px 20px",
-          background: "#075985",
-          color: "white",
-          border: 0,
-          borderRadius: 8,
-          cursor: "pointer"
-        }}
-      >
-        {loading ? "Loading..." : "Call Dynamic API"}
+      <button onClick={callApi} disabled={loading}>
+        {loading ? "Loading..." : "Call Backend API"}
       </button>
 
       <pre style={{
-        marginTop: 24,
-        padding: 20,
-        background: "white",
-        borderRadius: 8,
-        whiteSpace: "pre-wrap",
-        overflowWrap: "anywhere"
+        marginTop: 20,
+        padding: 16,
+        background: "#f3f4f6",
+        whiteSpace: "pre-wrap"
       }}>
-        {result}
+        {message}
       </pre>
     </main>
   );
