@@ -1,14 +1,10 @@
-
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "My Azure Application",
-  description: "Next.js and Express on Azure App Service"
-};
+import type { ReactNode } from "react";
 
 export default function RootLayout({
-  children
-}: Readonly<{ children: React.ReactNode }>) {
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <html lang="en">
       <body>{children}</body>
