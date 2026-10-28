@@ -1,10 +1,21 @@
-
 const express = require("express");
 const next = require("next");
 const path = require("path");
+const fs = require("fs");
 
 const port = process.env.PORT || 8080;
-const frontendDir = path.join(__dirname, "../frontend");
+
+const nestedFrontend = path.join(__dirname, "frontend");
+const siblingFrontend = path.join(__dirname, "../frontend");
+
+const frontendDir = fs.existsSync(
+  path.join(nestedFrontend, ".next", "required-server-files.json")
+)
+  ? nestedFrontend
+  : siblingFrontend;
+
+console.log("Using frontend directory:", frontendDir);
+
 const app = next({
   dev: false,
   dir: frontendDir,
