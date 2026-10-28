@@ -23,13 +23,15 @@ server.get("/health", (req, res) => {
   res.status(200).json({ status: "healthy" });
 });
 
-app.prepare().then(() => {
-  server.all("/{*path}", (req, res) => handle(req, res));
+app.prepare()
+  .then(() => {
+    server.all("/{*path}", (req, res) => handle(req, res));
 
-  server.listen(port, "0.0.0.0", () => {
-    console.log(`myapps listening on port ${port}`);
+    server.listen(port, "0.0.0.0", () => {
+      console.log(`myapps listening on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to start Next.js:", err);
+    process.exit(1);
   });
-}).catch((err) => {
-  console.error("Failed to start Next.js:", err);
-  process.exit(1);
-});
